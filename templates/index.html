@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YT to MP3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center h-screen">
+
+    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center text-red-500">YouTube MP3 Downloader</h1>
+        
+        <form action="/download" method="POST" id="downloadForm">
+            <input type="text" name="url" id="urlInput" placeholder="Paste link..." required
+                class="w-full p-3 mb-4 rounded bg-gray-700 border border-gray-600 focus:border-red-500 outline-none">
+            
+            <button type="submit" id="dlBtn" class="w-full bg-red-600 py-3 rounded font-bold hover:bg-red-700 transition">
+                Start Download
+            </button>
+        </form>
+
+        <div id="progressContainer" class="hidden mt-6">
+            <div class="flex justify-between mb-1">
+                <span class="text-sm font-medium text-red-500">Downloading...</span>
+                <span id="percentText" class="text-sm font-medium text-red-500">0%</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2.5">
+                <div id="progressBar" class="bg-red-600 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+            <p id="statusMsg" class="text-xs text-gray-400 mt-2 text-center">Please wait, converting to MP3...</p>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const form = document.getElementById('downloadForm');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const percentText = document.getElementById('percentText');
+        const statusMsg = document.getElementById('statusMsg');
+
+        socket.on('progress', function(data) {
+            const p = data.percentage.toFixed(1);
+            progressBar.style.width = p + '%';
+            percentText.innerText = p + '%';
+            
+            if(p >= 100) {
+                statusMsg.innerText = "Conversion in progress... Your file will download shortly.";
+            }
+        });
+
+        form.onsubmit = () => {
+            progressContainer.classList.remove('hidden');
+            document.getElementById('dlBtn').disabled = true;
+            document.getElementById('dlBtn').classList.add('opacity-50');
+        };
+    </script>
+</body>
+</html>
